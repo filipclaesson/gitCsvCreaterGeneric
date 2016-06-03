@@ -1,6 +1,6 @@
 import csv
 import QuantLib as ql
-from instruments import *
+import instruments as instHandler
 
 csvInstruments = []
 def readCsv(filePath):
@@ -28,7 +28,7 @@ def createInstrumentsFromCSV():
 				newInstrumentFlag = True
 			else:
 				newInstrumentFlag = False
-
+		#print(getInstrumentType(csvInstruments[i]),len(getQLCalendar(csvInstruments[i])))
 		#create the intrument
 		tempInstrumentFunction = getInstrumentTypeFunction(getInstrumentType(csvInstruments[i]))
 		tempList.append(tempInstrumentFunction(getDate(csvInstruments[i]), getTenors(csvInstruments[i]),getMaturity(csvInstruments[i]), getQLCalendar(csvInstruments[i]), getQLDayConvention(getBusinessDayConvention(csvInstruments[i])), getQLDayConvention(getTerminationConvention(csvInstruments[i])), getQLDateGeneration(csvInstruments[i]), ql.Actual360(), getUniquePrice(csvInstruments[i])))
@@ -49,7 +49,7 @@ def getDate(instrumentRow):
 	year = int("20" + date[0:2])
 	month = int(date[3:5])
 	day = int(date[6:8])
-	return Date(day,month,year)
+	return ql.Date(day,month,year)
 
 def getPeriod1(instrumentRow):
 	tenor = instrumentRow[2]
@@ -86,34 +86,30 @@ def getCurrency2(instrumentRow):
 # Functions for creating instruments
 def getInstrumentTypeFunction(instrumentType):
 	if instrumentType == "irs":
-		return myIRS
+		return instHandler.myIRS
 	elif instrumentType == "ois":
-		return myOIS
+		return instHandler.myOIS
 	elif instrumentType == "ts":
-		return myTS
+		return instHandler.myTS
 	elif instrumentType == "ccs":
-		return myCCS
+		return instHandler.myCCS
 	elif instrumentType == "fra":
-		return myFRA
+		return instHandler.myFRA
 	elif instrumentType == "fxf":
-		return myFXF
-
+		return instHandler.myFXF
+# returns an array with a callendar for each leg
 def getQLCalendar(instrumentRow):
 	countryCode = getCountryCode(instrumentRow)
-	
+
+	cals = []
 	if (getInstrumentType(instrumentRow) == "ccs"):
 		countryCode2 = getCurrency2(instrumentRow)
-		cals = []
 		cals.append(getCalendar(countryCode))
 		cals.append(getCalendar(countryCode2))
-		return cals
-
-	cals = getCalendar(countryCode)
-
-
-	return getCalendar(countryCode)
-
-	
+	else:
+		cals.append(getCalendar(countryCode))
+		cals.append(getCalendar(countryCode))
+	return cals
 
 def getCalendar(countryCode):
 	if countryCode == "SEK":

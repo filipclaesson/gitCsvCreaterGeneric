@@ -13,17 +13,17 @@ def createMatrix(instrumentList, columns, startDate, matrixType, T):
     for inst in instrumentList:
         #Choose schedule depending on leg type
         if matrixType[1] == "Fix":
-            schedule = inst.getFix()
-            dc = inst.getFixDateConvention()
+            schedule = inst.getLeg1()
+            dc = inst.getLeg1DateConvention()
         elif matrixType[1] == "Flt":
-            schedule = inst.getFlt()
-            dc = inst.getFltDateConvention()
+            schedule = inst.getLeg2()
+            dc = inst.getLeg2DateConvention()
         elif matrixType[1] == "Flt1":
-            schedule = inst.getFlt1()
-            dc = inst.getFlt1DateConvention()
+            schedule = inst.getLeg1()
+            dc = inst.getLeg1DateConvention()
         elif matrixType[1] == "Flt2":
-            schedule = inst.getFlt2()
-            dc = inst.getFlt2DateConvention()
+            schedule = inst.getLeg2()
+            dc = inst.getLeg2DateConvention()
         
         #Choose type of matrix to construct, t or dt type
         if matrixType[0] == "t":
@@ -124,13 +124,13 @@ def printInstrumnetfile(iList, startIndex, f, T, startDate):
         start = startIndex
         for inst in iList:
             if legType == "Fix":
-                leg = inst.getFix()
+                leg = inst.getLeg1()
             elif legType == "Flt":
-                leg = inst.getFlt()
+                leg = inst.getLeg2()
             elif legType == "Flt1":
-                leg = inst.getFlt1()
+                leg = inst.getLeg1()
             elif legType == "Flt2":
-                leg = inst.getFlt2()
+                leg = inst.getLeg2()
             length = len(leg)
             f.write(str(start) + " " + str(length) + " ")
             start = start+1
@@ -146,8 +146,8 @@ def printInstrumnetfile(iList, startIndex, f, T, startDate):
             f.write("param frat1 := ")
             cnt=0
             for inst in iList:
-                dc = inst.getFixDateConvention()
-                t = dc.yearFraction(inst.getClcDate(), inst.getFix()[0])
+                dc = inst.getLeg1DateConvention()
+                t = dc.yearFraction(inst.getClcDate(), inst.getLeg1()[0])
                 f.write(str(cnt+startIndex) + " " + str(findIndexInT(T,t)) + " ")
                 #f.write(str(cnt+startIndex) + " " + str(inst.getFix()[0]) + " ")
                 cnt = cnt+1
@@ -155,8 +155,8 @@ def printInstrumnetfile(iList, startIndex, f, T, startDate):
             f.write("param frat2 := ")
             cnt=0
             for inst in iList:
-                dc = inst.getFixDateConvention()
-                t = dc.yearFraction(inst.getClcDate(), inst.getFlt()[0])            
+                dc = inst.getLeg1DateConvention()
+                t = dc.yearFraction(inst.getClcDate(), inst.getLeg2()[0])            
                 f.write(str(cnt+startIndex) + " " + str(findIndexInT(T,t)) + " ")
                 #f.write(str(cnt+startIndex) + " " + str(inst.getFlt()[0]) + " ")
                 cnt = cnt+1
@@ -164,9 +164,9 @@ def printInstrumnetfile(iList, startIndex, f, T, startDate):
             cnt=0
             f.write("param fradt := ")
             for inst in iList:
-                dc = inst.getFixDateConvention()
-                t1 = dc.yearFraction(inst.getClcDate(), inst.getFix()[0])
-                t2 = dc.yearFraction(inst.getClcDate(), inst.getFlt()[0])           
+                dc = inst.getLeg1DateConvention()
+                t1 = dc.yearFraction(inst.getClcDate(), inst.getLeg1()[0])
+                t2 = dc.yearFraction(inst.getClcDate(), inst.getLeg2()[0])           
                 f.write(str(cnt+startIndex) + " " + str(t2-t1) + " ")
                 #f.write(str(cnt+startIndex) + " " + str(inst.getFlt()[0]) + " ")
                 cnt = cnt+1
@@ -176,8 +176,8 @@ def printInstrumnetfile(iList, startIndex, f, T, startDate):
             f.write("param fxft := ")
             cnt=0
             for inst in iList:
-                dc = inst.getFixDateConvention()
-                t = dc.yearFraction(inst.getClcDate(), inst.getFix()[0])
+                dc = inst.getLeg1DateConvention()
+                t = dc.yearFraction(inst.getClcDate(), inst.getLeg1()[0])
                 f.write(str(cnt+startIndex) + " " + str(findIndexInT(T,t)) + " ")
                 #f.write(str(cnt+startIndex) + " " + str(inst.getFix()[0]) + " ")
                 cnt = cnt+1
@@ -186,8 +186,8 @@ def printInstrumnetfile(iList, startIndex, f, T, startDate):
             cnt=0
             f.write("param fxfdt := ")
             for inst in iList:
-                dc = inst.getFixDateConvention()
-                t1 = dc.yearFraction(inst.getClcDate(), inst.getFix()[0])        
+                dc = inst.getLeg1DateConvention()
+                t1 = dc.yearFraction(inst.getClcDate(), inst.getLeg1()[0])        
                 f.write(str(cnt+startIndex) + " " + str(t1) + " ")
                 #f.write(str(cnt+startIndex) + " " + str(inst.getFlt()[0]) + " ")
                 cnt = cnt+1
