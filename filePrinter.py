@@ -217,21 +217,21 @@ def findIndexInT(T, value):
                 return i
         return -999
 
-def createT(instrumentList, date):
+def createT(instrumentList, date, dateConvention):
     T = []
     T.append(0.00000)
-    dc = ql.Actual360()
+    dc = dateConvention
 
     for typeList in instrumentList:
         for instr in typeList:
             a = instr.getAllCashFlows()
             for i in a:
                 T.append(dc.yearFraction(date, i))
-
+                
     T = list(set(T))
     T.sort()
 
-    #Add extra cashflows if length between cash flow is more than 30 days
+    #Add extra cashflows if length between cash flow is more than 1 month
     Tnew = []
     for i in range(0,len(T)-1):
         delta = T[i+1] - T[i]

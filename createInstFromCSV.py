@@ -3,6 +3,8 @@ import QuantLib as ql
 import instruments as instHandler
 
 csvInstruments = []
+modelPenalties = {"small" : 0, "big": 0}
+scaleCon = []
 def readCsv(filePath):
 	#create a list of instrumentInfos - list item is a list of attributes of one instrument
 	with open(filePath, 'rt') as f:
@@ -11,11 +13,13 @@ def readCsv(filePath):
 		for row in reader:
 			csvInstruments.append(row)
 
-def createInstrumentsFromCSV():
+def createInstrumentsFromCSV(dc):
+	dateConvention = dc
 	iterator = iter(csvInstruments)
 	newInstrumentFlag = False
 	instrumentSetsList = []
 	tempList = []
+	#loop through the csv list of instruments
 	for i in range(0, len(csvInstruments)):
 		# if the flag is raised the instrument is of a new type and the list is saved and a new one is created
 		if (newInstrumentFlag):
@@ -28,10 +32,9 @@ def createInstrumentsFromCSV():
 				newInstrumentFlag = True
 			else:
 				newInstrumentFlag = False
-		#print(getInstrumentType(csvInstruments[i]),len(getQLCalendar(csvInstruments[i])))
 		#create the intrument
 		tempInstrumentFunction = getInstrumentTypeFunction(getInstrumentType(csvInstruments[i]))
-		tempList.append(tempInstrumentFunction(getDate(csvInstruments[i]), getTenors(csvInstruments[i]),getMaturity(csvInstruments[i]), getQLCalendar(csvInstruments[i]), getQLDayConvention(getBusinessDayConvention(csvInstruments[i])), getQLDayConvention(getTerminationConvention(csvInstruments[i])), getQLDateGeneration(csvInstruments[i]), ql.Actual360(), getUniquePrice(csvInstruments[i])))
+		tempList.append(tempInstrumentFunction(getDate(csvInstruments[i]), getTenors(csvInstruments[i]),getMaturity(csvInstruments[i]), getQLCalendar(csvInstruments[i]), getQLDayConvention(getBusinessDayConvention(csvInstruments[i])), getQLDayConvention(getTerminationConvention(csvInstruments[i])), getQLDateGeneration(csvInstruments[i]), dateConvention, getUniquePrice(csvInstruments[i])))
 		#if it is the last instrument the list is saved
 		if i == len(csvInstruments)-1:
 			instrumentSetsList.append(tempList)
@@ -222,23 +225,34 @@ def getInstrumentTenors():
 
 	return tenors
 
+def setInstrumentPenalties(small, big):
+	#print(modelPenalties)
+	modelPenalties["small"] = small
+	modelPenalties["big"] = big
+	
+
+
 def getInstrumentPenalties():
+	#print("small: ", modelPenalties[0], " big: ", modelPenalties[1])
+
 	penalties = []
 	for i in csvInstruments:
 		if (getInstrumentType(i)=="ccs") | (getInstrumentType(i)=="ts"):
-			penalty = 100 # borde vara 100ggr större men ty lägre likviditet så tillåter vi lite mer avvikelser
+			penalty = modelPenalties["big"] # borde vara 100ggr större men ty lägre likviditet så tillåter vi lite mer avvikelser
 		else:
-			penalty = 10
+			penalty = modelPenalties["small"]
 
 		penalties.append(penalty)
 	return penalties
 
 
-def getInstrumentScaleCon():
-	scaleCon = []
+def setInstrumentScaleCon(scale):
 	for i in range(0, len(csvInstruments)):
-		scaleCon.append(1)
+		scaleCon.append(scale)
 
+	return scaleCon
+
+def getInstrumentScaleCon():
 	return scaleCon
 
 
@@ -286,6 +300,13 @@ def getCurrencySet():
 
 	#print(tenors)
 	return a
+
+
+def getUniquePriceSet():
+	prices = []
+	for i in csvInstruments:
+		prices.append(getUniquePrice(i))
+	return prices	
 
 
 def getTenorSet():

@@ -2,20 +2,35 @@
 #from filePrinter import *
 import filePrinter as filePrinter
 import createInstFromCSV as csvHandler
+import QuantLib as ql
 
 # Overview 
 # 1. read csv file
 # 2. create instruments
 # 3. print info from instruments
 
-
 # -------------- 1. read csv file and get info needed -----------
 # Read csv file
-csvFilePath = 'csvFiler/set1-20141016.csv'
-csvHandler.readCsv(csvFilePath) #csv File is read and local variable in craeteInstFromCSV is created
-
-# get information about the instrument sets in csv file
+csvFilePath = 'csvFiler/set1-20160512.csv'
+csvHandler.readCsv(csvFilePath) 
 today = csvHandler.getStartDate()
+
+# set model parameters 
+csvHandler.setInstrumentPenalties(10,100)
+csvHandler.setInstrumentScaleCon(1)
+dateConvention = ql.Actual360() #used to calculate
+
+# -------------- 2. Create instruments -----------
+# creates instrument objects where each instrument type
+iList = csvHandler.createInstrumentsFromCSV(dateConvention)
+print("Start Date: " + str(today))
+
+# create T-vector
+T = filePrinter.createT(iList, today, dateConvention)
+# -------------- 3. Print instruments to file -----------
+
+# get information about the instrument sets
+uniquePrices = csvHandler.getUniquePriceSet()
 iStartNumbers = csvHandler.getInstrumentIndexes()
 currency = csvHandler.getInstrumentCurrencies()
 penalty = csvHandler.getInstrumentPenalties()
@@ -27,23 +42,10 @@ tenor2 = csvHandler.getInstrumentTenor2()
 currencySet = csvHandler.getCurrencySet()
 tenorSet = csvHandler.getTenorSet()
 
-# -------------- 2. Create instruments -----------
-# fill iList with a list for each instrument type
-iList = []
-iList = csvHandler.createInstrumentsFromCSV()
-print("Start Date: " + str(today))
-T = filePrinter.createT(iList, today)
-
-# fill uniquePrices with all instrument prices
-uniquePrices = []
-uniquePrices = filePrinter.createUniquePrices(iList)
-
-# -------------- 3. Print instruments to file -----------
 # Open the output file
 f = open('data.dat', 'a')
 f.seek(0)
 f.truncate()
-
 f.write("data;\n")
 
 #print currencySet
